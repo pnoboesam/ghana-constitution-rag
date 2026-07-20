@@ -1,3 +1,6 @@
 .venv/
 notebooks/
 .env
+chroma_db
+
+__pycache__
