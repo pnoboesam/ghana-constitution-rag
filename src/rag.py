@@ -1,11 +1,12 @@
 from retrieval import retrieve
 from utils import format_docs
+from reranker import rerank
 
 question = 'How can I become a citizen of Ghana'
 
 docs = retrieve(question)
-context = format_docs(docs)
+reranked = rerank(question, docs)
+context = format_docs(reranked)
 
-print(len(docs))
 print('-----------')
 print(context[:1000])

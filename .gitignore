@@ -2,5 +2,6 @@
 notebooks/
 .env
 chroma_db
+chroma_db_hf/
 
 __pycache__
