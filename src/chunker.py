@@ -1,4 +1,5 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from .parser import documents
 
 def chunk_documents(documents):
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
@@ -12,3 +13,4 @@ def chunk_documents(documents):
 
     return chunks
 
+chunks = chunk_documents(documents)

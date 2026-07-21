@@ -1,7 +1,7 @@
-from langchain_huggingface import HuggingFaceEmbeddings
+# from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_ollama import OllamaEmbeddings
-from config import OPENAI_API_KEY
+from .config import OPENAI_API_KEY
 
 
 def get_embedding_model(model_name: str ='nomic'):

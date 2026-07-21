@@ -1,9 +1,8 @@
 from langchain_community.retrievers import BM25Retriever
 from langchain_chroma import Chroma
-from parser import get_documents
-from chunker import chunk_documents
-from embeddings import get_embedding_model
-from config import CHROMA_DIR_OPENAI, CHROMA_DIR_HF, CHROMA_DIR_NOMIC
+from .chunker import chunks
+from .embeddings import get_embedding_model
+from .config import CHROMA_DIR_OPENAI, CHROMA_DIR_HF, CHROMA_DIR_NOMIC
 
 # Reciprocal Rank Fusion (RRF) Implementation
 def reciprocal_rank_fusion(retriever_results: list[list], weights: list[float] | None = None, k=60):
@@ -62,19 +61,19 @@ def get_retrievers(chunks, embedding_model, model_name, k=10):
 
     return [bm25_retriever, vector_retriever]
 
+[embedding_model, model_name] = get_embedding_model(model_name='nomic')
+
+[bm25_retriever, vector_retriever] = get_retrievers(
+    chunks,
+    embedding_model,
+    model_name
+    )
 
 
 def retrieve(question):
-    documents = get_documents()
-    chunks = chunk_documents(documents)
-    [embedding_model, model_name] = get_embedding_model(model_name='nomic')
-    retrievers = get_retrievers(chunks, embedding_model, model_name)
+    bm25_docs = bm25_retriever.invoke(question)
+    vector_docs = vector_retriever.invoke(question)
 
-    bm25_docs = retrievers[0].invoke(question)
-    vector_docs = retrievers[1].invoke(question)
-
-    ranked_docs = reciprocal_rank_fusion([bm25_docs, vector_docs])
-
-    return ranked_docs
+    return reciprocal_rank_fusion([bm25_docs, vector_docs])
 
 

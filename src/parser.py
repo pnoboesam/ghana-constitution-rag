@@ -1,6 +1,6 @@
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
-from config import BASE_DIR
+from .config import BASE_DIR
 import re
 
 path = BASE_DIR / "data" / "ghanaian_constitution1992.pdf"
@@ -252,3 +252,5 @@ def get_documents():
     print(f"number of documents after parsing: {len(documents)}")
     
     return documents
+
+documents = get_documents()
