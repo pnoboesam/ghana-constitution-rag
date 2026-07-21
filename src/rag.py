@@ -2,7 +2,7 @@ from retrieval import retrieve
 from utils import format_docs
 from reranker import rerank
 
-question = 'How can I become a citizen of Ghana'
+question = 'Who is the child according to the constitution'
 
 docs = retrieve(question)
 reranked = rerank(question, docs)
