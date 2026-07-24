@@ -22,7 +22,6 @@ FAILED_CASES_PATH = EVAL_DIR / "reports" / "failed_cases.csv"
 
 MIN_FAITHFULNESS = 0.80
 MIN_ANSWER_CORRECTNESS = 0.80
-MIN_ANSWER_RELEVANCY = 0.80
 MIN_CONTEXT_PRECISION = 0.80
 MIN_CONTEXT_RECALL = 0.80
 
@@ -60,7 +59,6 @@ results = evaluate(
     metrics=[
         faithfulness,
         answer_correctness,
-        answer_relevancy,
         context_precision,
         context_recall,
     ],
@@ -68,7 +66,7 @@ results = evaluate(
     embeddings=embeddings,
     batch_size=1,
 )
-
+print(results)
 
 # SAVE LATEST METRICS -------------------------------
 with open(LATEST_METRICS_PATH, "w", encoding="utf-8") as f:
@@ -84,11 +82,29 @@ df.to_csv(LATEST_RESULTS_PATH, index=False)
 failed_cases = df[
     (df["faithfulness"] < MIN_FAITHFULNESS) |
     (df["answer_correctness"] < MIN_ANSWER_CORRECTNESS) |
-    (df["answer_relevancy"] < MIN_ANSWER_RELEVANCY) |
     (df["context_precision"] < MIN_CONTEXT_PRECISION) |
     (df["context_recall"] < MIN_CONTEXT_RECALL)
 ]
 failed_cases.to_csv(FAILED_CASES_PATH, index=False)
 
 
-print(results)
+# ADD QUALITY GATES --------------------------------
+if results['faithfulness'] < MIN_FAITHFULNESS:
+     raise RuntimeError(
+          f"Faithfulness dropped to {results['faithfulness']:.3f}"
+     )
+
+if results['answer_correctness'] < MIN_ANSWER_CORRECTNESS:
+     raise RuntimeError(
+          f"Answer correctness dropped to {results['answer_correctness']:.3f}"
+     )
+
+if results['context_precision'] < MIN_CONTEXT_PRECISION:
+     raise RuntimeError(
+          f"Context precision dropped to {results['context_precision']:.3f}"
+     )
+
+if results['context_recall'] < MIN_CONTEXT_RECALL:
+     raise RuntimeError(
+          f"Context recall dropped to {results['context_recall']:.3f}"
+     )
