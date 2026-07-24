@@ -1,0 +1,43 @@
+[
+    {
+        "user_input": "What immunities and privileges are entitled to a witness before a commission of inquiry?",
+        "response": "A witness before a commission of inquiry is entitled to the same immunities and privileges as if he were a witness before the High Court (Article 283, Chapter TWENTY-THREE, p.183).",
+        "retrieved_contexts": [
+            "A witness before a commission of inquiry is entitled to the same\nimmunities and privileges as if he were a witness before the High Court.",
+            "(1) A commission of inquiry shall have the powers, rights and privileges\nof the High Court or a Justice of the High Court at a trial, in respect of -\n(a) enforcing the attendance of witnesses and examining them on\noath, affirmation or otherwise;\n(b) compelling the production of documents; and\n(c) the issue of a commission or request to examine witnesses\nabroad.\n(2) A sole commissioner or a member of a commission of inquiry shall\nnot be liable to any action or suit in respect of any matter or thing done\nby him in the performance of his function as a commissioner or member."
+        ],
+        "reference": "A witness before a commission of inquiry is entitled to the same immunities and privileges as if he were a witness before the High Court."
+    },
+    {
+        "user_input": "What is the age threshold for defining a child according to Article 28 of the Ghanaian Constitution?",
+        "response": "According to Article 6, Chapter Three, Page 28 of the Ghanaian Constitution, the age thresholds for defining a child in different contexts are:\n\n- A child of not more than seven years of age found in Ghana whose parents are not known is presumed to be a citizen of Ghana by birth.\n- A child of not more than sixteen years of age, neither of whose parents is a citizen of Ghana, who is adopted by a citizen of Ghana shall, by virtue of the adoption, be a citizen of Ghana.\n\nThus, the age thresholds mentioned are seven years and sixteen years, depending on the specific circumstance (presumption of citizenship or adoption) (Article 6, Chapter Three, p.28).",
+        "retrieved_contexts": [
+            "(1) Every person who, on the coming into force of this Constitution, is a\ncitizen of Ghana by law shall continue to be a citizen of Ghana.\n(2) Subject to the provisions of this Constitution, a person born in or\noutside Ghana after the coming into force of this Constitution, shall\nbecome a citizen of Ghana at the date of his birth if either of his parents\nor grandparents is or was a citizen of Ghana.\n(3) A child of not more than seven years of age found in Ghana whose\nparents are not know shall be presumed to be a citizen of Ghana by birth.\n(4) A child of not more than sixteen years of age neither of whose\nparents is a citizen of Ghana who is adopted by a citizen of Ghana shall,\nbe virtue of the adoption, be a citizen of Ghana."
+        ],
+        "reference": "A child means a person below the age of eighteen years."
+    },
+    {
+        "user_input": "What are the main sections covered regarding the Superior Courts as outlined in this part of the constitution?",
+        "response": "The main sections covered regarding the Superior Courts in this part of the constitution include:\n\n1. The composition of the Superior Courts of Judicature, which comprises the Supreme Court, the Court of Appeal, and the High Court and Regional Tribunals (Article 126(1)(a)(i)-(iii)).\n\n2. The status of the Superior Courts as superior courts of record, with the power to commit for contempt to themselves and all powers vested in a court of record before the constitution came into force (Article 126(2)).\n\n3. The general rule that court proceedings shall be held in public, except where otherwise provided by the Constitution or ordered by a court in the interest of public morality, safety, or order (Article 126(3)).\n\n4. The authority of the Superior Courts to issue orders and directions necessary to enforce any judgment, decree, or order within their jurisdiction (Article 126(4)).\n\nThese sections collectively define the structure, powers, and procedural principles governing the Superior Courts (Article 126, CHAPTER ELEVEN, p.108).",
+        "retrieved_contexts": [
+            "(1) The Judiciary shall consist of -\n(a) the Superior Courts of Judicature comprising -\n(i) the Supreme Court;\n(ii) the Court of Appeal; and\n(iii) the High Court and Regional Tribunals.\n(b) such lower courts or tribunals as Parliament may by law\nestablish.\n(2) The Superior Courts shall be superior courts of record and shall have\nthe power to commit for contempt to themselves and all such powers as\nwere vested in a court of record immediately before the coming into\nforce of this constitution.\n(3) Except as otherwise provided in this Constitution or as may\notherwise be ordered by a court in the interest of public morality, public\nsafety or public order, the proceedings of every court shall be held in\npublic.\n(4) In the exercise of the judicial power conferred on the Judiciary by\nthis Constitution or any other law, the Superior Courts may, in relation to\nany matter within their jurisdiction, issue such orders and directions as\nmay be necessary to ensure the enforcement of any judgement, decree or\norder of those courts."
+        ],
+        "reference": "The main sections cover the Supreme Court (including its supervisory jurisdiction, power to review decisions, and powers of a Single Justice), the Court of Appeal (composition and qualifications of justices, and powers of a Single Justice), the High Court (composition, qualifications, jurisdiction, and supervisory jurisdiction), and Regional Tribunals (establishment, composition, qualifications, and jurisdiction). Additionally, sections address appointment, retirement, removal, and service conditions of justices and tribunal members."
+    },
+    {
+        "user_input": "What power does the First President under the Constitution have regarding laws within twelve months of assuming office?",
+        "response": "The First President under the Constitution has the power, within twelve months after assuming office, to make provision by constitutional instrument for repealing, modifying, adding to, or adapting any law to bring it into accord with the provisions of the Constitution or otherwise to give effect to the Constitution (Part III - THE JUDICIARY, Section 30, p.207).",
+        "retrieved_contexts": [
+            "The First President under this Constitution may, at any time within\ntwelve months after assuming office as President, by constitutional\ninstrument, make such provision as may appear necessary for repealing,\nmodifying, adding to or adapting any law for bringing it into accord with\nthe provisions of this Constitution or otherwise for giving effect to this\nConstitution."
+        ],
+        "reference": "The First President may, at any time within twelve months after assuming office as President, by constitutional instrument, make provision for repealing, modifying, adding to or adapting any law for bringing it into accord with the provisions of the Constitution or otherwise for giving effect to the Constitution."
+    },
+    {
+        "user_input": "What is the voting requirement for matters in Parliament according to the Constitution?",
+        "response": "The voting requirement for matters in Parliament according to the Constitution is that matters shall be determined by the votes of the majority of members present and voting, with at least half of all the members of Parliament present (Chapter TEN, Article 104, p.97).",
+        "retrieved_contexts": [
+            "(1) Except as otherwise provided in this Constitution, matters in\nParliament shall be determined by the votes of the majority of members\npresent and voting, with at least half of all the members of Parliament\npresent.\n(2) The Speaker shall have neither an original nor casting vote.\n(3) Where the votes on any motion are equal it shall be taken to be lost.\n(4) Where Parliament is considering a bill to amend the Constitution, or\nwhere the voting is in relation to the election or removal of any person\nunder this Constitution or under any other law, voting shall be in secret.\n(5) A member who is a party to or a partner in a firm which is a party to\na contract with the Government shall declare his interest and shall not\nvote on any question relating to the contract."
+        ],
+        "reference": "Matters in Parliament shall be determined by the votes of the majority of members present and voting, with at least half of all the members of Parliament present."
+    }
+]
