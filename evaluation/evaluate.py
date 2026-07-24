@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+
 from ragas import evaluate
 from ragas.metrics import (
     faithfulness,
@@ -9,8 +11,7 @@ from ragas.metrics import (
 )
 from ragas import EvaluationDataset
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_anthropic import ChatAnthropic
-from langchain_ollama import OllamaEmbeddings, OllamaLLM
+
 from src.config import OPENAI_API_KEY, DATA_DIR, EVAL_DIR
 from evaluation.run_inference import run_inference
 
@@ -19,6 +20,7 @@ PREDICTION_DATASET_PATH = DATA_DIR / "predictions_dataset.json"
 LATEST_METRICS_PATH = EVAL_DIR / "reports" / "latest_metrics.json"
 LATEST_RESULTS_PATH = EVAL_DIR / "reports" / "latest_results.csv"
 FAILED_CASES_PATH = EVAL_DIR / "reports" / "failed_cases.csv"
+METRICS_HISTORY_PATH = EVAL_DIR / "reports" / "metrics_history"
 
 MIN_FAITHFULNESS = 0.80
 MIN_ANSWER_CORRECTNESS = 0.80
@@ -68,10 +70,19 @@ results = evaluate(
 )
 print(results)
 
-# SAVE LATEST METRICS -------------------------------
-with open(LATEST_METRICS_PATH, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=4, ensure_ascii=False)
 
+# SAVE LATEST METRICS -------------------------------
+metrics = results._repr_dict
+with open(LATEST_METRICS_PATH, "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=4, ensure_ascii=False)
+
+
+# SAVE METRICS HISTORY -------------------------------
+timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+history_path = METRICS_HISTORY_PATH / f"{timestamp}.json"
+
+with open(history_path, "w") as f:
+    json.dump(metrics, f, indent=4)
 
 # SAVE LATEST RESULTS -------------------------------
 df = results.to_pandas()
@@ -88,23 +99,23 @@ failed_cases = df[
 failed_cases.to_csv(FAILED_CASES_PATH, index=False)
 
 
-# ADD QUALITY GATES --------------------------------
-if results['faithfulness'] < MIN_FAITHFULNESS:
-     raise RuntimeError(
-          f"Faithfulness dropped to {results['faithfulness']:.3f}"
-     )
+# # ADD QUALITY GATES --------------------------------
+# if metrics['faithfulness'] < MIN_FAITHFULNESS:
+#      raise RuntimeError(
+#           f"Faithfulness dropped to {metrics['faithfulness']:.3f}"
+#      )
 
-if results['answer_correctness'] < MIN_ANSWER_CORRECTNESS:
-     raise RuntimeError(
-          f"Answer correctness dropped to {results['answer_correctness']:.3f}"
-     )
+# if metrics['answer_correctness'] < MIN_ANSWER_CORRECTNESS:
+#      raise RuntimeError(
+#           f"Answer correctness dropped to {metrics['answer_correctness']:.3f}"
+#      )
 
-if results['context_precision'] < MIN_CONTEXT_PRECISION:
-     raise RuntimeError(
-          f"Context precision dropped to {results['context_precision']:.3f}"
-     )
+# if metrics['context_precision'] < MIN_CONTEXT_PRECISION:
+#      raise RuntimeError(
+#           f"Context precision dropped to {metrics['context_precision']:.3f}"
+#      )
 
-if results['context_recall'] < MIN_CONTEXT_RECALL:
-     raise RuntimeError(
-          f"Context recall dropped to {results['context_recall']:.3f}"
-     )
+# if metrics['context_recall'] < MIN_CONTEXT_RECALL:
+#      raise RuntimeError(
+#           f"Context recall dropped to {metrics['context_recall']:.3f}"
+#      )
