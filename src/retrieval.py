@@ -1,7 +1,7 @@
 from langchain_community.retrievers import BM25Retriever
 from langchain_chroma import Chroma
 from .chunker import chunks
-from .embeddings import get_embedding_model
+from .embeddings import embeddings
 from .config import CHROMA_DIR_OPENAI, CHROMA_DIR_HF, CHROMA_DIR_NOMIC
 
 # Reciprocal Rank Fusion (RRF) Implementation
@@ -52,16 +52,15 @@ def get_retrievers(chunks, embedding_model, model_name, k=10):
         CHROMA_DIR = CHROMA_DIR_OPENAI    
 
     # Vector search retriever
-    vectorstore = Chroma.from_documents(
-        documents=chunks, 
-        embedding=embedding_model,
-        persist_directory=str(CHROMA_DIR)
+    vectorstore = Chroma(
+        persist_directory=str(CHROMA_DIR),
+        embedding_function=embedding_model,
     )
     vector_retriever = vectorstore.as_retriever(search_kwargs={"k":k})
 
     return [bm25_retriever, vector_retriever]
 
-[embedding_model, model_name] = get_embedding_model(model_name='nomic')
+[embedding_model, model_name] = embeddings
 
 [bm25_retriever, vector_retriever] = get_retrievers(
     chunks,

@@ -9,7 +9,7 @@ from .utils import format_docs
 from .reranker import rerank
 
 
-def get_llm(provider="anthropic", temperature=0, max_tokens=1024):
+def get_llm(provider="ollama", temperature=0, max_tokens=1024):
     if provider == "openai":
         return ChatOpenAI(
             model="gpt-4.1-mini",
@@ -20,6 +20,13 @@ def get_llm(provider="anthropic", temperature=0, max_tokens=1024):
     elif provider == "anthropic":
         return ChatAnthropic(
             model="claude-haiku-4-5-20251001",
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+    
+    elif provider == "ollama":
+        return OllamaLLM(
+            model="llama3.1:8b",
             temperature=temperature,
             max_tokens=max_tokens
         )
@@ -40,7 +47,7 @@ def load_prompt(name):
 
 answer_prompt_template = load_prompt("generation_promptv1")
 prompt = ChatPromptTemplate.from_template(answer_prompt_template)
-llm = get_llm()
+llm = get_llm(provider='openai')
 
 
 def generate_answer(question, context):
