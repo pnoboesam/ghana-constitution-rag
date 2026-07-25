@@ -1,7 +1,7 @@
 # from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_ollama import OllamaEmbeddings
-from .config import OPENAI_API_KEY
+from .config import OPENROUTER_API_KEY
 
 
 def get_embedding_model(model_name: str ='nomic'):
@@ -12,8 +12,9 @@ def get_embedding_model(model_name: str ='nomic'):
 
     elif model_name == 'openai':
         embedding_model = OpenAIEmbeddings(
-            model="text-embedding-3-small",
-            api_key=OPENAI_API_KEY
+            model="openai/text-embedding-3-small",
+            api_key=OPENROUTER_API_KEY,
+            base_url="https://openrouter.ai/api/v1",
         )
 
     else:
@@ -24,4 +25,4 @@ def get_embedding_model(model_name: str ='nomic'):
     return [embedding_model, model_name]
 
 
-embeddings = get_embedding_model(model_name='nomic')
+embeddings = get_embedding_model(model_name='openai')
