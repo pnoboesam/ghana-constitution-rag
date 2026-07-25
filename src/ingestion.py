@@ -1,7 +1,8 @@
-from chunker import chunks
-from embeddings import embeddings
+import shutil
+from pathlib import Path
+from .chunker import chunks
+from .embeddings import embeddings
 from langchain_chroma import Chroma
-from langchain_community.retrievers import BM25Retriever
 from .config import CHROMA_DIR_OPENAI, CHROMA_DIR_HF, CHROMA_DIR_NOMIC
 
 [embedding_model, model_name] = embeddings
@@ -13,9 +14,15 @@ elif model_name == 'hf':
 elif model_name == 'openai':
     CHROMA_DIR = CHROMA_DIR_OPENAI    
 
+if Path(CHROMA_DIR).exists():
+    print("Removing existing vector database...")
+    shutil.rmtree(CHROMA_DIR)
+
+print("Building new vector database...")
 Chroma.from_documents(
     documents=chunks, 
     embedding=embedding_model,
     persist_directory=str(CHROMA_DIR)
 )
 
+print(f"Indexed {len(chunks)} chunks successfully.")
