@@ -16,7 +16,7 @@ from src.config import OPENAI_API_KEY, DATA_DIR, EVAL_DIR
 from evaluation.run_inference import run_inference
 
 GROUND_TRUTH_DATASET_PATH = DATA_DIR / "ground_truth_dataset.json"
-PREDICTION_DATASET_PATH = DATA_DIR / "predictions_dataset.json"
+PREDICTION_DATASET_PATH = DATA_DIR / "rag_predictions.json"
 LATEST_METRICS_PATH = EVAL_DIR / "reports" / "latest_metrics.json"
 LATEST_RESULTS_PATH = EVAL_DIR / "reports" / "latest_results.csv"
 FAILED_CASES_PATH = EVAL_DIR / "reports" / "failed_cases.csv"
@@ -34,7 +34,7 @@ len(evaluation_dataset)
 
 
 # RUN RAG PIPELINE FOR EACH QUESTION----------------------
-run_inference(evaluation_dataset[:5])
+run_inference(evaluation_dataset)
 
 
 # RUN RAG EVALUATION --------------------------------------
@@ -78,7 +78,7 @@ with open(LATEST_METRICS_PATH, "w", encoding="utf-8") as f:
 
 
 # SAVE METRICS HISTORY -------------------------------
-timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 history_path = METRICS_HISTORY_PATH / f"{timestamp}.json"
 
 with open(history_path, "w") as f:

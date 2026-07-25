@@ -1,0 +1,6 @@
+{
+    "faithfulness": 0.7686868686868686,
+    "answer_correctness": 0.5623632765037748,
+    "context_precision": 0.59999999995,
+    "context_recall": 0.6
+}

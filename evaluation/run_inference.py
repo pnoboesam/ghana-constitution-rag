@@ -4,7 +4,7 @@ from src.rag import answer_question
 from src.config import DATA_DIR
 
 
-PREDICTION_DATASET_PATH = DATA_DIR / "predictions_dataset.json"
+PREDICTION_DATASET_PATH = DATA_DIR / "rag_predictions.json"
 
 def run_inference(evaluation_dataset):
     # RUN RAG PIPELINE FOR EACH QUESTION----------------------
