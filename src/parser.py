@@ -70,21 +70,21 @@ def parse_constitution(path):
 
         metadata = {
             "source": path.name,
-            "page_start": page_start,
-            "page_end": page_end,
+            "page_start": int(page_start),
+            "page_end": int(page_end),
         }
 
         if mode == "constitution":
             metadata["chapter"] = current_chapter
             metadata["chapter_title"] = current_chapter_title
             metadata["type"] = "article"
-            metadata["article"] = current_article
+            metadata["article"] = int(current_article or 0)
 
         elif mode == "first_schedule":
             metadata["type"] = "schedule"
             metadata["schedule"] = current_schedule
             metadata["part"] = current_part
-            metadata["section"] = current_article
+            metadata["section"] = int(current_article or 0)
 
         elif mode == "second_schedule":
             metadata["type"] = "oath"
