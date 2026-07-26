@@ -5,6 +5,7 @@ while True:
     
     if question.lower() == "quit":
         answer = 'GoodBye'
+        print(answer)
         break
     else:
         answer = answer_question(question)['answer']
