@@ -1,8 +1,14 @@
 from langchain_community.retrievers import BM25Retriever
+from typing import Literal, Optional
+from pydantic import BaseModel, Field
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableLambda
 from langchain_chroma import Chroma
 from .chunker import chunks
 from .embeddings import embeddings
 from .config import CHROMA_DIR_OPENAI, CHROMA_DIR_HF, CHROMA_DIR_NOMIC
+from .prompt import load_prompt, get_llm
+from .metadata_search import metadata_search
 
 # Reciprocal Rank Fusion (RRF) Implementation
 def reciprocal_rank_fusion(retriever_results: list[list], weights: list[float] | None = None, k=60):
@@ -68,11 +74,57 @@ def get_retrievers(chunks, embedding_model, model_name, k=10):
     model_name
     )
 
+llm = get_llm()
 
-def retrieve(question):
+
+def query_router():
+    class RouteQuery(BaseModel):
+        """Route user query to the most relevant document search"""
+
+        docsearch: Literal['metadata_search', 'hybrid_search'] = Field(
+            ...,
+            description='Given a user question choose which document search would be most relevant for retrieving documents to answer their question'
+        )
+
+    structured_llm = llm.with_structured_output((RouteQuery))
+
+    system = load_prompt("router_system_promptv1")
+
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ('system', system),
+            ('human', '{question}')
+        ]
+    )
+
+    router = prompt | structured_llm
+
+    return router
+
+
+def hybrid_search(question):
     bm25_docs = bm25_retriever.invoke(question)
     vector_docs = vector_retriever.invoke(question)
 
     return reciprocal_rank_fusion([bm25_docs, vector_docs])
+
+
+
+def retrieve(question):
+
+    def choose_route(result):
+        if 'metadata_search' in result.docsearch.lower():
+            retrieved_docs = metadata_search(question)
+            return retrieved_docs
+        else:
+            retrieved_docs = hybrid_search(question)
+            return retrieved_docs
+
+
+    router = query_router()
+    router_chain = router | RunnableLambda(choose_route)
+
+    return router_chain.invoke({'question': question})
+
 
 

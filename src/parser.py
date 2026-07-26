@@ -21,6 +21,48 @@ def parse_constitution(path):
 
     pages = pages[23:]
 
+    # -----------------------------
+        # Helper functions
+    # -----------------------------
+
+
+    CHAPTER_MAP = {
+        "ONE": 1,
+        "TWO": 2,
+        "THREE": 3,
+        "FOUR": 4,
+        "FIVE": 5,
+        "SIX": 6,
+        "SEVEN": 7,
+        "EIGHT": 8,
+        "NINE": 9,
+        "TEN": 10,
+        "ELEVEN": 11,
+        "TWELVE": 12,
+        "THIRTEEN": 13,
+        "FOURTEEN": 14,
+        "FIFTEEN": 15,
+        "SIXTEEN": 16,
+        "SEVENTEEN": 17,
+        "EIGHTEEN": 18,
+        "NINETEEN": 19,
+        "TWENTY": 20,
+        "TWENTY-ONE": 21,
+        "TWENTY-TWO": 22,
+        "TWENTY-THREE": 23,
+        "TWENTY-FOUR": 24,
+        "TWENTY-FIVE": 25,
+        "TWENTY-SIX": 26,
+    }
+
+    ROMAN_MAP = {
+        "I": 1,
+        "II": 2,
+        "III": 3,
+        "IV": 4,
+        "V": 5,
+    }
+
 
     # -----------------------------
     # Current parser state
@@ -29,11 +71,11 @@ def parse_constitution(path):
 
     mode = "constitution"
 
-    current_chapter = "CHAPTER ONE"
+    current_chapter = 1
     current_chapter_title = "THE CONSTITUTION"
 
     current_schedule = None
-    current_part = None
+    current_part = 1
 
     current_article = 1
     current_title = None
@@ -48,7 +90,7 @@ def parse_constitution(path):
     # -----------------------------
     chapter_pattern = re.compile(r"^CHAPTER\s+[A-Z\s-]+$")
     article_pattern = re.compile(r"^(\d+)\.$")
-    part_pattern = re.compile(r"^PART\s+[IVXLC]+")
+    part_pattern = re.compile(r"^PART\s*-?\s*([IVXLCM]+)\b")
     first_schedule_pattern = re.compile(r"^FIRST SCHEDULE$")
     second_schedule_pattern = re.compile(r"^SECOND SCHEDULE$")
     oath_pattern = re.compile(r"^THE\s+.*OATH.*$")
@@ -70,8 +112,8 @@ def parse_constitution(path):
 
         metadata = {
             "source": path.name,
-            "page_start": int(page_start),
-            "page_end": int(page_end),
+            "page_start": page_start,
+            "page_end": page_end,
         }
 
         if mode == "constitution":
@@ -127,7 +169,7 @@ def parse_constitution(path):
                 save_current_document(page_number)
 
                 mode = "first_schedule"
-                current_schedule = "FIRST SCHEDULE"
+                current_schedule = 1
                 current_article = None
                 current_part = None
                 current_text = []
@@ -142,7 +184,7 @@ def parse_constitution(path):
                 save_current_document(page_number)
 
                 mode = "second_schedule"
-                current_schedule = "SECOND SCHEDULE"
+                current_schedule = 2
                 current_title = None
                 current_text = []
 
@@ -156,7 +198,8 @@ def parse_constitution(path):
 
                 save_current_document(page_number)
                 
-                current_chapter = line
+                chapter_name = line.replace("CHAPTER ", "").strip()
+                current_chapter = CHAPTER_MAP[chapter_name]
 
                 # -----------------------------------
                 # Chapter title
@@ -187,7 +230,14 @@ def parse_constitution(path):
 
                 if part_pattern.match(line):
 
-                    current_part = line
+                    save_current_document(page_number)
+
+                    match = re.match(r"^PART\s*-?\s*([IVXLCM]+)\b", line)
+
+                    if match:
+                        roman = match.group(1)
+                        current_part = ROMAN_MAP[roman]
+
                     continue
 
             # -----------------------------------
