@@ -1,7 +1,7 @@
 from src.rag import answer_question
 
 while True:
-    question = input(">>>")
+    question = input(">>> ")
     
     if question.lower() == "quit":
         answer = 'GoodBye'

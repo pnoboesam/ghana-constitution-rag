@@ -4,6 +4,8 @@ from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda
 from langchain_chroma import Chroma
+from langsmith import traceable
+
 from .chunker import chunks
 from .embeddings import embeddings
 from .config import CHROMA_DIR_OPENAI, CHROMA_DIR_HF, CHROMA_DIR_NOMIC
@@ -76,8 +78,8 @@ def get_retrievers(chunks, embedding_model, model_name, k=10):
 
 llm = get_llm()
 
-
-def query_router():
+@traceable(name='Query Router')
+def query_router(question):
     class RouteQuery(BaseModel):
         """Route user query to the most relevant document search"""
 
@@ -99,9 +101,12 @@ def query_router():
 
     router = prompt | structured_llm
 
-    return router
+    relevant_document_search = router.invoke({'question': question}).docsearch.lower()
+
+    return relevant_document_search
 
 
+@traceable(name="Hybrid Retrieval")
 def hybrid_search(question):
     bm25_docs = bm25_retriever.invoke(question)
     vector_docs = vector_retriever.invoke(question)
@@ -113,7 +118,7 @@ def hybrid_search(question):
 def retrieve(question):
 
     def choose_route(result):
-        if 'metadata_search' in result.docsearch.lower():
+        if 'metadata_search' in result:
             retrieved_docs = metadata_search(question)
             return retrieved_docs
         else:
@@ -121,10 +126,10 @@ def retrieve(question):
             return retrieved_docs
 
 
-    router = query_router()
-    router_chain = router | RunnableLambda(choose_route)
+    result = query_router(question)
+    retrieved_docs = choose_route(result)
 
-    return router_chain.invoke({'question': question})
+    return retrieved_docs
 
 
 

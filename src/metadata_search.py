@@ -6,6 +6,7 @@ from langchain_chroma import Chroma
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
+from langsmith import traceable
 
 
 llm = get_llm()
@@ -90,6 +91,7 @@ vectorstore = Chroma(
 collection = vectorstore._collection
 
 
+@traceable(name='Metadata Extractor')
 def metadata_to_where(metadata_results):
     conditions = []
 
@@ -119,7 +121,7 @@ def metadata_to_where(metadata_results):
     return conditions[0] if len(conditions) == 1 else {"$and": conditions}
 
 
-
+@traceable(name='Metadata Search')
 def metadata_search(question):
 
     query_analyzer = prompt | structured_llm

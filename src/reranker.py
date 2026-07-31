@@ -1,4 +1,5 @@
 from sentence_transformers import CrossEncoder
+from langsmith import traceable
 
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
@@ -16,6 +17,7 @@ def filter_relevant_context(reranked_docs, MIN_RERANK_SCORE=0.35):
     return relevant_docs
 
 
+@traceable(name="Cross Encoder")
 def rerank(question, retrieved_docs):
     pairs = [ (question, doc.page_content) for doc in retrieved_docs]
     scores = reranker.predict(pairs)
