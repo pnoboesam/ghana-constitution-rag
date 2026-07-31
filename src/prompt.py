@@ -17,7 +17,7 @@ def load_prompt(name):
 def get_llm(provider="openai", temperature=0, max_tokens=1024):
     if provider == "openai":
         return ChatOpenAI(
-            model='openai/gpt-oss-120b',
+            model='openai/gpt-4.1-mini',
             base_url="https://openrouter.ai/api/v1",
             api_key=OPENROUTER_API_KEY
         )
