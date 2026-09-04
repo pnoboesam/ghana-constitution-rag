@@ -12,13 +12,15 @@ def run_inference(evaluation_dataset):
     total = len(evaluation_dataset)
     start_time = time.perf_counter()
 
-    for data in evaluation_dataset:
+    for i, data in enumerate(evaluation_dataset, start=1):
         question = data["question"]
         results = answer_question(question)
         answer = results['answer']
         retrieved_chunks = results['retrieved_chunks']
 
         eval_data = {
+            "id": data["id"],
+            "answerable": data["answerable"],
             "user_input": question,
             "response": answer,
             "retrieved_contexts":  [doc.page_content for doc in retrieved_chunks],
@@ -26,10 +28,10 @@ def run_inference(evaluation_dataset):
         }
         
         elapsed = time.perf_counter()-start_time
-        avg_time = elapsed / data['id']
-        remaining = avg_time * (total - data['id'])
+        avg_time = elapsed / i
+        remaining = avg_time * (total - i)
 
-        print(f"[{data['id']}/{total}] "
+        print(f"[{i}/{total}] "
             f"Ans: {answer[:50]}... | "
             f"Elapsed: {elapsed:.1f}s | "
             f"ETA: {remaining:.1f}s"
