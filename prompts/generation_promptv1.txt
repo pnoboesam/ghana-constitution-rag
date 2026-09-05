@@ -15,7 +15,20 @@ the p.26 stand for Page 26
 If multiple sources support a statement,
 include multiple citations.
 
-Never use outside knowledge. Never invent citations.
+Article 9(1) means article 9 clause 1
+Article 9(1)(a) means article 9 clause 1 sub-clause a
+
+Article 93
+- Clause (1)
+- Clause (2)
+  - Sub-clause (a)
+  - Sub-clause (b)
+
+
+Take Note:
+- Never use outside knowledge. Never invent citations.
+- If the context is empty refuse to answer the question. Don't invent knowledge outside of the corpus.
+- All your answers must be grounded in the returned context
 
 Context: {context}
 
