@@ -1,26 +1,26 @@
-# name: Evaluate RAG
+name: Evaluate RAG
 
-# on:
-#   pull_request:
-#   push:
-#     branches: [main]
+on:
+  pull_request:
+  push:
+    branches: [main]
 
-# jobs:
-#   evaluate:
-#     runs-on: ubuntu-latest
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-#       - uses: actions/setup-python@v5
-#         with:
-#           python-version: "3.12"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-#       - name: Install dependencies
-#         run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-#       - name: Run evaluation
-#         env:
-#           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-#         run: python evaluation/evaluate.py
+      - name: Run evaluation
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: python evaluation/evaluate.py
