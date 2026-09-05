@@ -118,7 +118,7 @@ def metadata_to_where(metadata_results):
     if not conditions:
         return None
 
-    return conditions[0] if len(conditions) == 1 else {"$and": conditions}
+    return conditions[0] if len(conditions) == 1 else {"$or": conditions}
 
 
 @traceable(name='Metadata Search')
