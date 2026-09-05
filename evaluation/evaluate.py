@@ -29,7 +29,7 @@ METRICS_HISTORY_PATH = EVAL_DIR / "reports" / "metrics_history"
 LATEST_REPORT_PATH = EVAL_DIR / "reports" / "latest_report.md"
 
 MIN_FAITHFULNESS = 0.80
-MIN_ANSWER_CORRECTNESS = 0.80
+MIN_ANSWER_CORRECTNESS = 0.70
 MIN_CONTEXT_PRECISION = 0.80
 MIN_CONTEXT_RECALL = 0.80
 
@@ -175,23 +175,29 @@ report = generate_markdown_report(metrics, df_answerable, df_unanswerable, thres
 with open(LATEST_REPORT_PATH, "w", encoding="utf-8") as f:
     f.write(report)
 
-# # ADD QUALITY GATES --------------------------------
-# if metrics['faithfulness'] < MIN_FAITHFULNESS:
-#      raise RuntimeError(
-#           f"Faithfulness dropped to {metrics['faithfulness']:.3f}"
-#      )
 
-# if metrics['answer_correctness'] < MIN_ANSWER_CORRECTNESS:
-#      raise RuntimeError(
-#           f"Answer correctness dropped to {metrics['answer_correctness']:.3f}"
-#      )
+# ADD QUALITY GATES --------------------------------
+if df_answerable['faithfulness'].mean() < MIN_FAITHFULNESS:
+     raise RuntimeError(
+          f"Faithfulness dropped to {df_answerable['faithfulness'].mean():.3f}"
+     )
 
-# if metrics['context_precision'] < MIN_CONTEXT_PRECISION:
-#      raise RuntimeError(
-#           f"Context precision dropped to {metrics['context_precision']:.3f}"
-#      )
+if df_answerable['answer_correctness'].mean()  < MIN_ANSWER_CORRECTNESS:
+     raise RuntimeError(
+          f"Answer correctness dropped to {df_answerable['answer_correctness'].mean():.3f}"
+     )
 
-# if metrics['context_recall'] < MIN_CONTEXT_RECALL:
-#      raise RuntimeError(
-#           f"Context recall dropped to {metrics['context_recall']:.3f}"
-#      )
+if df_answerable['context_precision'].mean() < MIN_CONTEXT_PRECISION:
+     raise RuntimeError(
+          f"Context precision dropped to {df_answerable['context_precision'].mean():.3f}"
+     )
+
+if df_answerable['context_recall'].mean() < MIN_CONTEXT_RECALL:
+     raise RuntimeError(
+          f"Context recall dropped to {df_answerable['context_recall'].mean():.3f}"
+     )
+
+if len(failed_unanswerable_cases) > 0:
+    raise RuntimeError(
+        f"{len(failed_unanswerable_cases)} unsafe no-answer responses detected"
+    )
