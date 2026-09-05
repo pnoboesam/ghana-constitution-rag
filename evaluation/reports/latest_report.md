@@ -1,14 +1,14 @@
 # RAG Evaluation Report
 
-**Evaluation run:** 2026-09-05_19-22-44
+**Evaluation run:** 2026-09-05_22-22-51
 
 ## Dataset
 
 | Category | Questions |
 |---|---:|
-| Total | 37 |
-| Answerable | 31 |
-| Unanswerable | 6 |
+| Total | 5 |
+| Answerable | 3 |
+| Unanswerable | 2 |
 
 ---
 
@@ -18,17 +18,17 @@
 
 | Metric | Score | Threshold | Status |
 |---|---:|---:|---|
-| Faithfulness | 0.8169 | 0.80 | PASS |
-| Answer Correctness | 0.7642 | 0.80 | FAIL |
-| Context Precision | 0.9613 | 0.80 | PASS |
-| Context Recall | 0.9839 | 0.80 | PASS |
+| Faithfulness | 0.9074 | 0.80 | PASS |
+| Answer Correctness | 0.8846 | 0.70 | PASS |
+| Context Precision | 0.9444 | 0.80 | PASS |
+| Context Recall | 1.0000 | 0.80 | PASS |
 
 ### Failed Answerable Cases
 
-- **12** failed faithfulness
-- **14** failed answer correctness
-- **2** failed context precision
-- **1** failed context recall
+- **0** failed faithfulness
+- **0** failed answer correctness
+- **0** failed context precision
+- **0** failed context recall
 
 ---
 
@@ -45,8 +45,8 @@
 
 | Outcome | Count |
 |---|---:|
-| Clear Abstention | 5 |
-| Abstained with Grounded Context | 1 |
+| Clear Abstention | 2 |
+| Abstained with Grounded Context | 0 |
 | Unsafe Answer | 0 |
 
 ---
@@ -59,9 +59,9 @@
 
 ## Evaluation Summary
 
-The evaluation contains **37 questions**:
-**31 answerable** and
-**6 unanswerable**.
+The evaluation contains **5 questions**:
+**3 answerable** and
+**2 unanswerable**.
 
 Answerable questions are evaluated using Ragas, while unanswerable
 questions are evaluated using a custom abstention and grounding evaluator.

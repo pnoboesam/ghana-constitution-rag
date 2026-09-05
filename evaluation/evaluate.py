@@ -190,7 +190,7 @@ if baseline_metrics:
             "change": round(current_value - baseline_value, 4),
             "regression": round(drop, 4),
             "allowed_regression": tolerance,
-            "passed": drop <= tolerance,
+            "passed": bool(drop <= tolerance),
         }
 
 metrics["regression"] = regressions

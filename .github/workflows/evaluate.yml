@@ -23,4 +23,4 @@ jobs:
       - name: Run evaluation
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        run: python evaluation/evaluate.py
+        run: python -m evaluation.evaluate
