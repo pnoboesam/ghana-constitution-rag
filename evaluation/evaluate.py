@@ -18,9 +18,11 @@ from evaluation.run_inference import run_inference
 
 from evaluation.no_answer_evaluator import evaluate_no_answer_response
 
+REPORTS_DIR = EVAL_DIR / "reports"
 GROUND_TRUTH_DATASET_PATH = DATA_DIR / "ground_truth_dataset.json"
 PREDICTION_DATASET_PATH = DATA_DIR / "rag_predictions.json"
 LATEST_METRICS_PATH = EVAL_DIR / "reports" / "latest_metrics.json"
+BASELINE_METRICS_PATH = EVAL_DIR / "reports" / "baseline_metrics.json"
 LATEST_ANSWERABLE_RESULTS_PATH = EVAL_DIR / "reports" / "latest_answerable_results.csv"
 LATEST_UNANSWERABLE_RESULTS_PATH = EVAL_DIR / "reports" / "latest_unanswerable_results.csv"
 FAILED_ANSWERABLE_CASES_PATH = EVAL_DIR / "reports" / "failed_answerable_cases.csv"
@@ -28,10 +30,26 @@ FAILED_UNANSWERABLE_CASES_PATH = EVAL_DIR / "reports" / "failed_unanswerable_cas
 METRICS_HISTORY_PATH = EVAL_DIR / "reports" / "metrics_history"
 LATEST_REPORT_PATH = EVAL_DIR / "reports" / "latest_report.md"
 
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+METRICS_HISTORY_PATH.mkdir(parents=True, exist_ok=True)
+
 MIN_FAITHFULNESS = 0.80
 MIN_ANSWER_CORRECTNESS = 0.70
 MIN_CONTEXT_PRECISION = 0.80
 MIN_CONTEXT_RECALL = 0.80
+
+MAX_REGRESSION = {
+    "faithfulness": 0.03,
+    "answer_correctness": 0.05,
+    "context_precision": 0.05,
+    "context_recall": 0.05,
+}
+
+# LOAD PREVIOUS BASELINE METRICS--------------------------
+baseline_metrics = None
+if BASELINE_METRICS_PATH.exists():
+    with open(BASELINE_METRICS_PATH, "r", encoding="utf-8") as f:
+        baseline_metrics = json.load(f)
 
 # LOAD EVALUATION DATASET---------------------------------
 with open(GROUND_TRUTH_DATASET_PATH, "r") as f:
@@ -152,6 +170,31 @@ metrics = {
      "unanswerable_evaluation": no_answer_summary
 }
 
+
+# CALCULATE REGRESSION -------------------------------
+regressions = {}
+
+if baseline_metrics:
+    baseline = baseline_metrics["answerable_evaluation"]["metrics"]
+    current = metrics["answerable_evaluation"]["metrics"]
+
+    for metric, tolerance in MAX_REGRESSION.items():
+        baseline_value = baseline[metric]
+        current_value = current[metric]
+
+        drop = baseline_value - current_value
+
+        regressions[metric] = {
+            "baseline": baseline_value,
+            "current": current_value,
+            "change": round(current_value - baseline_value, 4),
+            "regression": round(drop, 4),
+            "allowed_regression": tolerance,
+            "passed": drop <= tolerance,
+        }
+
+metrics["regression"] = regressions
+
 with open(LATEST_METRICS_PATH, "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=4, ensure_ascii=False)
 
@@ -176,28 +219,56 @@ with open(LATEST_REPORT_PATH, "w", encoding="utf-8") as f:
     f.write(report)
 
 
-# ADD QUALITY GATES --------------------------------
-if df_answerable['faithfulness'].mean() < MIN_FAITHFULNESS:
-     raise RuntimeError(
-          f"Faithfulness dropped to {df_answerable['faithfulness'].mean():.3f}"
-     )
+# ---------------- QUALITY GATES ----------------
 
-if df_answerable['answer_correctness'].mean()  < MIN_ANSWER_CORRECTNESS:
-     raise RuntimeError(
-          f"Answer correctness dropped to {df_answerable['answer_correctness'].mean():.3f}"
-     )
+# 1. Aggregate hard floors
+quality_failures = []
 
-if df_answerable['context_precision'].mean() < MIN_CONTEXT_PRECISION:
-     raise RuntimeError(
-          f"Context precision dropped to {df_answerable['context_precision'].mean():.3f}"
-     )
+if df_answerable["faithfulness"].mean() < MIN_FAITHFULNESS:
+    quality_failures.append("faithfulness")
 
-if df_answerable['context_recall'].mean() < MIN_CONTEXT_RECALL:
-     raise RuntimeError(
-          f"Context recall dropped to {df_answerable['context_recall'].mean():.3f}"
-     )
+if df_answerable["answer_correctness"].mean() < MIN_ANSWER_CORRECTNESS:
+    quality_failures.append("answer_correctness")
 
+if df_answerable["context_precision"].mean() < MIN_CONTEXT_PRECISION:
+    quality_failures.append("context_precision")
+
+if df_answerable["context_recall"].mean() < MIN_CONTEXT_RECALL:
+    quality_failures.append("context_recall")
+
+# 2. Missing metric values
+if df_answerable[
+    [
+        "faithfulness",
+        "answer_correctness",
+        "context_precision",
+        "context_recall",
+    ]
+].isna().any().any():
+    quality_failures.append("missing_metric_values")
+
+# 3. Unsafe no-answer responses
 if len(failed_unanswerable_cases) > 0:
+    quality_failures.append("unsafe_no_answer_responses")
+
+# 4. Regression against protected baseline
+if baseline_metrics:
+    failed_regressions = [
+        metric
+        for metric, result in regressions.items()
+        if not result["passed"]
+    ]
+
+    if failed_regressions:
+        quality_failures.append(
+            f"regression:{','.join(failed_regressions)}"
+        )
+
+# 5. Fail CI
+if quality_failures:
     raise RuntimeError(
-        f"{len(failed_unanswerable_cases)} unsafe no-answer responses detected"
+        "Evaluation quality gate failed: "
+        + "; ".join(quality_failures)
     )
+
+print("All evaluation quality gates passed.")

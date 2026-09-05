@@ -5,3 +5,5 @@ notebooks/
 .env
 chroma_db*
 __pycache__
+
+desktop.ini

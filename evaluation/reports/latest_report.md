@@ -1,6 +1,6 @@
 # RAG Evaluation Report
 
-**Evaluation run:** 2026-09-04_19-40-36
+**Evaluation run:** 2026-09-05_19-22-44
 
 ## Dataset
 
@@ -18,17 +18,17 @@
 
 | Metric | Score | Threshold | Status |
 |---|---:|---:|---|
-| Faithfulness | 0.7570 | 0.80 | FAIL |
-| Answer Correctness | 0.7219 | 0.80 | FAIL |
-| Context Precision | 0.9333 | 0.80 | PASS |
-| Context Recall | 0.9516 | 0.80 | PASS |
+| Faithfulness | 0.8169 | 0.80 | PASS |
+| Answer Correctness | 0.7642 | 0.80 | FAIL |
+| Context Precision | 0.9613 | 0.80 | PASS |
+| Context Recall | 0.9839 | 0.80 | PASS |
 
 ### Failed Answerable Cases
 
-- **13** failed faithfulness
-- **19** failed answer correctness
-- **3** failed context precision
-- **2** failed context recall
+- **12** failed faithfulness
+- **14** failed answer correctness
+- **2** failed context precision
+- **1** failed context recall
 
 ---
 
