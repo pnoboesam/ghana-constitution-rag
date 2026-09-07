@@ -55,7 +55,7 @@ if BASELINE_METRICS_PATH.exists():
 with open(GROUND_TRUTH_DATASET_PATH, "r") as f:
     evaluation_dataset = json.load(f)
 
-# RUN RAG PIPELINE FOR EACH QUESTION----------------------
+# RUN RAG PIPELINE FOR EACH QUESTION----------------clear------
 run_inference(evaluation_dataset)
 
 # RUN RAG EVALUATION --------------------------------------
