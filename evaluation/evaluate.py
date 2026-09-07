@@ -102,7 +102,7 @@ answerable_eval_results = evaluate(
     ],
     llm=llm,
     embeddings=embeddings,
-    batch_size=5,
+    batch_size=4,
 )
 print(answerable_eval_results)
 
