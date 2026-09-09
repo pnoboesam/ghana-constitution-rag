@@ -9,6 +9,9 @@ def chunk_documents(documents):
 
     chunks = text_splitter.split_documents(documents)
 
+    for chunk in chunks:
+        chunk.metadata["text"] = chunk.page_content
+
     print(f"number of chunks: {len(chunks)}")
 
     return chunks
