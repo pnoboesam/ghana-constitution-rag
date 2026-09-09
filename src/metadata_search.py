@@ -1,9 +1,12 @@
-from .embeddings import embeddings
-from src.config import CHROMA_DIR_OPENAI, CHROMA_DIR_HF, CHROMA_DIR_NOMIC
+import os
+
 from .prompt import load_prompt, get_llm
+from .embeddings import embeddings
+
 from typing import Optional
-from langchain_chroma import Chroma
+from pinecone import Pinecone
 from pydantic import BaseModel, Field
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
 from langsmith import traceable
@@ -62,7 +65,6 @@ class MetadataSearch(BaseModel):
         )
     )
 
-
 structured_llm = llm.with_structured_output((MetadataSearch))
 
 
@@ -75,66 +77,106 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 
-[embedding_model, model_name] = embeddings
+# --------------------------------------------------
+# Pinecone configuration
 
-if model_name == 'nomic':
-    CHROMA_DIR = CHROMA_DIR_NOMIC
-elif model_name == 'hf':
-    CHROMA_DIR = CHROMA_DIR_HF
-elif model_name == 'openai':
-    CHROMA_DIR = CHROMA_DIR_OPENAI
+PINECONE_API_KEY = os.environ["PINECONE_API_KEY"]
 
-vectorstore = Chroma(
-    persist_directory=CHROMA_DIR,
-    embedding_function=embedding_model
-)
-collection = vectorstore._collection
+INDEX_HOST = "https://ghana-constitution-4i7bb15.svc.aped-4627-b74a.pinecone.io"
+INDEX_NAME = "ghana-constitution"
+NAMESPACE = "ghana-legal_docs"
 
+pc = Pinecone(api_key=PINECONE_API_KEY)
 
-@traceable(name='Metadata Extractor')
-def metadata_to_where(metadata_results):
+index = pc.Index(INDEX_NAME)
+# -------------------------------------------------
+
+embedding_model = embeddings[0]
+
+@traceable(name="Metadata Filter Builder")
+def metadata_to_filter(metadata_results):
+
     conditions = []
 
     for field, value in metadata_results:
+
         if value is None:
             continue
 
         if isinstance(value, list):
+
             if len(value) == 1:
                 conditions.append({
-                    field: value[0]
+                    field: {
+                        "$eq": value[0]
+                    }
                 })
             else:
                 conditions.append({
                     field: {
-                        "$in": [v for v in value]
+                        "$in": value
                     }
                 })
+
         else:
             conditions.append({
-                field: value
+                field: {
+                    "$eq": value
+                }
             })
 
     if not conditions:
         return None
 
-    return conditions[0] if len(conditions) == 1 else {"$or": conditions}
+    if len(conditions) == 1:
+        return conditions[0]
+
+    return {
+        "$or": conditions
+    }
 
 
-@traceable(name='Metadata Search')
+@traceable(name="Metadata Search")
 def metadata_search(question):
 
     query_analyzer = prompt | structured_llm
-    metadata_results = query_analyzer.invoke({"question": question})
 
-    results = collection.get(
-        where=metadata_to_where(metadata_results)
+    metadata_results = query_analyzer.invoke(
+        {"question": question}
     )
 
-    docs = [
-        Document(page_content=doc, metadata=meta)
-        for doc, meta in zip(results["documents"], results["metadatas"])
-    ]
+    metadata_filter = metadata_to_filter(
+        metadata_results.model_dump().items()
+    )
+
+    if metadata_filter is None:
+        return []
+
+    # Embed the user's actual question
+    query_vector = embedding_model.embed_query(question)
+
+    # Semantic search constrained by metadata
+    results = index.query(
+        vector=query_vector,
+        top_k=10,
+        namespace=NAMESPACE,
+        filter=metadata_filter,
+        include_metadata=True,
+    )
+
+    docs = []
+
+    for match in results.matches:
+        metadata = dict(match.metadata or {})
+        page_content = metadata.pop("text", "")
+
+        docs.append(
+            Document(
+                page_content=page_content,
+                metadata=metadata,
+            )
+        )
+
 
     return docs
 

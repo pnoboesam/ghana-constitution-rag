@@ -1,14 +1,14 @@
+import os
+
 from langchain_community.retrievers import BM25Retriever
-from typing import Literal, Optional
+from typing import Literal
 from pydantic import BaseModel, Field
+from langchain_pinecone import PineconeVectorStore
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnableLambda
-from langchain_chroma import Chroma
 from langsmith import traceable
 
 from .chunker import chunks
 from .embeddings import embeddings
-from .config import CHROMA_DIR_OPENAI, CHROMA_DIR_HF, CHROMA_DIR_NOMIC
 from .prompt import load_prompt, get_llm
 from .metadata_search import metadata_search
 
@@ -44,36 +44,32 @@ def reciprocal_rank_fusion(retriever_results: list[list], weights: list[float] |
     
     ranked_docs = [ ranked_doc[1]["doc"] for ranked_doc in ranked_docs]
 
+    print(f"number of fused docs: {len(ranked_docs)}")
+
     return ranked_docs
 
 
-def get_retrievers(chunks, embedding_model, model_name, k=10):
+def get_retrievers(chunks, embedding_model, k=10):
     # Keyword search retriever
     bm25_retriever = BM25Retriever.from_documents(chunks)
     bm25_retriever.k = k
 
-    if model_name == 'nomic':
-        CHROMA_DIR = CHROMA_DIR_NOMIC
-    elif model_name == 'hf':
-        CHROMA_DIR = CHROMA_DIR_HF
-    elif model_name == 'openai':
-        CHROMA_DIR = CHROMA_DIR_OPENAI    
-
     # Vector search retriever
-    vectorstore = Chroma(
-        persist_directory=str(CHROMA_DIR),
-        embedding_function=embedding_model,
+    vectorstore = PineconeVectorStore(
+        index_name="ghana-constitution",
+        embedding=embedding_model,
+        namespace="ghana-legal_docs",
     )
+
     vector_retriever = vectorstore.as_retriever(search_kwargs={"k":k})
 
     return [bm25_retriever, vector_retriever]
 
-[embedding_model, model_name] = embeddings
+embedding_model = embeddings[0]
 
 [bm25_retriever, vector_retriever] = get_retrievers(
     chunks,
     embedding_model,
-    model_name
     )
 
 llm = get_llm()
@@ -110,6 +106,9 @@ def query_router(question):
 def hybrid_search(question):
     bm25_docs = bm25_retriever.invoke(question)
     vector_docs = vector_retriever.invoke(question)
+
+    print(f"number of lexical docs: {len(bm25_docs)}")
+    print(f"number of semantic docs: {len(vector_docs)}")
 
     return reciprocal_rank_fusion([bm25_docs, vector_docs])
 

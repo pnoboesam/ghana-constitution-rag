@@ -12,6 +12,8 @@ llm = get_llm(provider='openai')
 
 
 def generate_answer(question, context):
+    if not context:
+        return "No context provided for a grounded answer."
     rag_chain = prompt | llm | StrOutputParser()
     return rag_chain.invoke({"context": context, "question":question})
 
