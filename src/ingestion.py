@@ -1,28 +1,62 @@
-import shutil
-from pathlib import Path
+import os
+
+from pinecone import Pinecone, ServerlessSpec
+from langchain_pinecone import PineconeVectorStore
+
 from .chunker import chunks
 from .embeddings import embeddings
-from langchain_chroma import Chroma
-from .config import CHROMA_DIR_OPENAI, CHROMA_DIR_HF, CHROMA_DIR_NOMIC
 
 [embedding_model, model_name] = embeddings
 
-if model_name == 'nomic':
-    CHROMA_DIR = CHROMA_DIR_NOMIC
-elif model_name == 'hf':
-    CHROMA_DIR = CHROMA_DIR_HF
-elif model_name == 'openai':
-    CHROMA_DIR = CHROMA_DIR_OPENAI    
+# --------------------------------------------------
+# Pinecone configuration
+PINECONE_API_KEY = os.environ["PINECONE_API_KEY"]
+INDEX_NAME = "ghana-constitution"
+NAMESPACE = "ghana-legal_docs"
 
-if Path(CHROMA_DIR).exists():
-    print("Removing existing vector database...")
-    shutil.rmtree(CHROMA_DIR)
+pc = Pinecone(api_key=PINECONE_API_KEY)
+# --------------------------------------------------
 
-print("Building new vector database...")
-Chroma.from_documents(
-    documents=chunks, 
+test_embedding = embedding_model.embed_query("test")
+dimension = len(test_embedding)
+
+if not pc.has_index(INDEX_NAME):
+    print(f"Creating Pinecone index: {INDEX_NAME}")
+
+    pc.create_index(
+        name=INDEX_NAME,
+        vector_type="dense",
+        dimension=dimension,
+        metric="cosine",
+        spec=ServerlessSpec(
+            cloud="aws",
+            region="us-east-1",
+        ),
+        deletion_protection="disabled",
+    )
+
+    print("Pinecone index created.")
+
+
+# --------------------------------------------------
+# Connect to the Pinecone index
+vectorstore = PineconeVectorStore(
+    index_name=INDEX_NAME,
     embedding=embedding_model,
-    persist_directory=str(CHROMA_DIR)
+    namespace=NAMESPACE,
 )
+# --------------------------------------------------
+
+
+# --------------------------------------------------
+# Replace existing corpus
+print("Removing existing documents...")
+
+vectorstore.delete(delete_all=True)
+
+print("Uploading chunks to Pinecone...")
+
+vectorstore.add_documents(chunks)
 
 print(f"Indexed {len(chunks)} chunks successfully.")
+# --------------------------------------------------
