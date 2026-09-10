@@ -29,4 +29,5 @@ jobs:
       - name: Run evaluation
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
         run: python -m evaluation.evaluate

@@ -10,6 +10,7 @@ from ragas.metrics import (
     context_recall
 )
 from ragas import EvaluationDataset
+from ragas.run_config import RunConfig
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 from evaluation.markdown_report import generate_markdown_report
@@ -55,7 +56,7 @@ if BASELINE_METRICS_PATH.exists():
 with open(GROUND_TRUTH_DATASET_PATH, "r") as f:
     evaluation_dataset = json.load(f)
 
-# RUN RAG PIPELINE FOR EACH QUESTION----------------clear------
+# RUN RAG PIPELINE FOR EACH QUESTION----------------------
 run_inference(evaluation_dataset)
 
 # RUN RAG EVALUATION --------------------------------------
@@ -92,6 +93,12 @@ print("Length of answerable questions", answerable_count)
 print("Length of non-answerable questions", unanswerable_count)
 
 answerable_cases_dataset = EvaluationDataset.from_list(answerable_cases_dataset)
+run_config = RunConfig(
+    timeout=300,
+    max_workers=2,
+    max_retries=10,
+    max_wait=60,
+)
 answerable_eval_results = evaluate(
     answerable_cases_dataset,
     metrics=[
@@ -103,6 +110,7 @@ answerable_eval_results = evaluate(
     llm=llm,
     embeddings=embeddings,
     batch_size=4,
+    run_config=run_config
 )
 print(answerable_eval_results)
 
