@@ -1,7 +1,6 @@
 from langchain_core.output_parsers import StrOutputParser
 from .retrieval import retrieve
 from .utils import format_docs
-from .reranker import rerank
 from .prompt import build_generation_prompt, get_llm
     
 

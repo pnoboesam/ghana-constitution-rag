@@ -1,5 +1,3 @@
-import os
-
 from langchain_community.retrievers import BM25Retriever
 from typing import Literal
 from pydantic import BaseModel, Field
@@ -8,9 +6,11 @@ from langchain_core.prompts import ChatPromptTemplate
 from langsmith import traceable
 
 from .chunker import chunks
+from .reranker import rerank
 from .embeddings import embeddings
 from .prompt import load_prompt, get_llm
 from .metadata_search import metadata_search
+
 
 # Reciprocal Rank Fusion (RRF) Implementation
 def reciprocal_rank_fusion(retriever_results: list[list], weights: list[float] | None = None, k=60):
@@ -122,7 +122,9 @@ def retrieve(question):
             return retrieved_docs
         else:
             retrieved_docs = hybrid_search(question)
-            return retrieved_docs
+            reranked_docs = rerank(question, retrieved_docs)
+
+            return reranked_docs
 
 
     result = query_router(question)
