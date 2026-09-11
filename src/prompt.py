@@ -1,17 +1,64 @@
-from pathlib import Path
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_ollama import OllamaLLM
-from .config import OPENROUTER_API_KEY
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    FewShotChatMessagePromptTemplate,
+    PromptTemplate,
+)
 
+from .config import OPENROUTER_API_KEY, BASE_DIR
+from prompts.examples import examples
 
 def load_prompt(name):
-    PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
+    PROMPTS_DIR = BASE_DIR / "prompts"
 
     path = PROMPTS_DIR / f"{name}.txt"
 
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
+
+
+def build_generation_prompt(name):
+    answer_prompt_template = load_prompt(name)
+
+    example_prompt = ChatPromptTemplate.from_messages([
+        (
+            "human",
+            """
+            Context:
+            {context}
+
+            Question:
+            {question}
+            """
+        ),
+        (
+            "ai",
+            "{answer}"
+        ),
+    ])
+
+    few_shot_prompt = FewShotChatMessagePromptTemplate(
+        examples=examples,
+        example_prompt=example_prompt,
+    )
+
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", answer_prompt_template),
+
+        few_shot_prompt,
+
+        ("human", """
+            Context:
+            {context}
+
+            Question:
+            {question}
+            """),
+    ])
+
+    return prompt
 
 
 def get_llm(provider="openai", temperature=0, max_tokens=1024):
@@ -38,3 +85,9 @@ def get_llm(provider="openai", temperature=0, max_tokens=1024):
     
     else:
         raise ValueError(f"Unknown provide: {provider}. Avaliable provider: 'openai', 'anthropic'")
+
+if __name__ == "__main__":
+    from icecream import ic as print
+    prompt = build_generation_prompt("generation_promptv2")
+    prompt = prompt.invoke({"context": "THIS IS MY CONTEXT HERE", "question": "THIS IS MY QUESTION HERE"})
+    print(prompt)

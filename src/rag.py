@@ -1,13 +1,11 @@
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from .retrieval import retrieve
 from .utils import format_docs
 from .reranker import rerank
-from .prompt import load_prompt, get_llm
+from .prompt import build_generation_prompt, get_llm
     
 
-answer_prompt_template = load_prompt("generation_promptv1")
-prompt = ChatPromptTemplate.from_template(answer_prompt_template)
+prompt = build_generation_prompt("generation_promptv2")
 llm = get_llm(provider='openai')
 
 
