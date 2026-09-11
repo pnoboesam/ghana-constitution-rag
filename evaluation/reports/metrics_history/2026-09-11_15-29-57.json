@@ -1,5 +1,5 @@
 {
-    "evaluation_run": "2026-09-11_19-02-50",
+    "evaluation_run": "2026-09-11_15-29-57",
     "dataset": {
         "total_questions": 37,
         "answerable_questions": 30,
@@ -8,10 +8,10 @@
     "answerable_evaluation": {
         "framework": "ragas",
         "metrics": {
-            "faithfulness": 0.8913,
-            "answer_correctness": 0.7974,
-            "context_precision": 0.8495,
-            "context_recall": 1.0
+            "faithfulness": 0.8906,
+            "answer_correctness": 0.7402,
+            "context_precision": 0.87,
+            "context_recall": 0.9
         }
     },
     "unanswerable_evaluation": {
@@ -29,35 +29,35 @@
     "regression": {
         "faithfulness": {
             "baseline": 0.8169,
-            "current": 0.8913,
-            "change": 0.0744,
-            "regression": -0.0744,
+            "current": 0.8906,
+            "change": 0.0737,
+            "regression": -0.0737,
             "allowed_regression": 0.03,
             "passed": true
         },
         "answer_correctness": {
             "baseline": 0.7642,
-            "current": 0.7974,
-            "change": 0.0332,
-            "regression": -0.0332,
+            "current": 0.7402,
+            "change": -0.024,
+            "regression": 0.024,
             "allowed_regression": 0.05,
             "passed": true
         },
         "context_precision": {
             "baseline": 0.9613,
-            "current": 0.8495,
-            "change": -0.1118,
-            "regression": 0.1118,
+            "current": 0.87,
+            "change": -0.0913,
+            "regression": 0.0913,
             "allowed_regression": 0.05,
             "passed": false
         },
         "context_recall": {
             "baseline": 0.9839,
-            "current": 1.0,
-            "change": 0.0161,
-            "regression": -0.0161,
+            "current": 0.9,
+            "change": -0.0839,
+            "regression": 0.0839,
             "allowed_regression": 0.05,
-            "passed": true
+            "passed": false
         }
     }
 }

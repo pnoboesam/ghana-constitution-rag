@@ -1,0 +1,64 @@
+{
+  "evaluation_run": "2026-09-11_17-55-41",
+  "rag_change": "Set SCORE_MARGIN to 1.0 in ranker.py",
+  "dataset": {
+    "total_questions": 37,
+    "answerable_questions": 30,
+    "unanswerable_questions": 7
+  },
+  "answerable_evaluation": {
+    "framework": "ragas",
+    "metrics": {
+      "faithfulness": 0.9,
+      "answer_correctness": 0.827,
+      "context_precision": 0.9833,
+      "context_recall": 1.0
+    }
+  },
+  "unanswerable_evaluation": {
+    "framework": "custom",
+    "metrics": {
+      "safe_no_answer_rate": 1.0,
+      "unsafe_answer_rate": 0.0
+    },
+    "outcomes": {
+      "clear_abstention": 6,
+      "abstained_with_grounded_context": 1,
+      "unsafe_answer": 0
+    }
+  },
+  "regression": {
+    "faithfulness": {
+      "baseline": 0.8169,
+      "current": 0.9,
+      "change": 0.0831,
+      "regression": -0.0831,
+      "allowed_regression": 0.03,
+      "passed": true
+    },
+    "answer_correctness": {
+      "baseline": 0.7642,
+      "current": 0.827,
+      "change": 0.0628,
+      "regression": -0.0628,
+      "allowed_regression": 0.05,
+      "passed": true
+    },
+    "context_precision": {
+      "baseline": 0.9613,
+      "current": 0.9833,
+      "change": 0.022,
+      "regression": -0.022,
+      "allowed_regression": 0.05,
+      "passed": true
+    },
+    "context_recall": {
+      "baseline": 0.9839,
+      "current": 1.0,
+      "change": 0.0161,
+      "regression": -0.0161,
+      "allowed_regression": 0.05,
+      "passed": true
+    }
+  }
+}

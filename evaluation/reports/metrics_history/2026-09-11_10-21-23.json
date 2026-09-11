@@ -1,5 +1,5 @@
 {
-    "evaluation_run": "2026-09-11_19-02-50",
+    "evaluation_run": "2026-09-11_10-21-23",
     "dataset": {
         "total_questions": 37,
         "answerable_questions": 30,
@@ -8,48 +8,48 @@
     "answerable_evaluation": {
         "framework": "ragas",
         "metrics": {
-            "faithfulness": 0.8913,
-            "answer_correctness": 0.7974,
-            "context_precision": 0.8495,
+            "faithfulness": 0.8278,
+            "answer_correctness": 0.7893,
+            "context_precision": 0.96,
             "context_recall": 1.0
         }
     },
     "unanswerable_evaluation": {
         "framework": "custom",
         "metrics": {
-            "safe_no_answer_rate": 1.0,
-            "unsafe_answer_rate": 0.0
+            "safe_no_answer_rate": 0.86,
+            "unsafe_answer_rate": 0.14
         },
         "outcomes": {
-            "clear_abstention": 6,
+            "clear_abstention": 5,
             "abstained_with_grounded_context": 1,
-            "unsafe_answer": 0
+            "unsafe_answer": 1
         }
     },
     "regression": {
         "faithfulness": {
             "baseline": 0.8169,
-            "current": 0.8913,
-            "change": 0.0744,
-            "regression": -0.0744,
+            "current": 0.8278,
+            "change": 0.0109,
+            "regression": -0.0109,
             "allowed_regression": 0.03,
             "passed": true
         },
         "answer_correctness": {
             "baseline": 0.7642,
-            "current": 0.7974,
-            "change": 0.0332,
-            "regression": -0.0332,
+            "current": 0.7893,
+            "change": 0.0251,
+            "regression": -0.0251,
             "allowed_regression": 0.05,
             "passed": true
         },
         "context_precision": {
             "baseline": 0.9613,
-            "current": 0.8495,
-            "change": -0.1118,
-            "regression": 0.1118,
+            "current": 0.96,
+            "change": -0.0013,
+            "regression": 0.0013,
             "allowed_regression": 0.05,
-            "passed": false
+            "passed": true
         },
         "context_recall": {
             "baseline": 0.9839,

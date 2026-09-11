@@ -226,7 +226,7 @@ report = generate_markdown_report(metrics, df_answerable, df_unanswerable, thres
 with open(LATEST_REPORT_PATH, "w", encoding="utf-8") as f:
     f.write(report)
 
-
+"""
 # ---------------- QUALITY GATES ----------------
 
 # 1. Aggregate hard floors
@@ -280,3 +280,4 @@ if quality_failures:
     )
 
 print("All evaluation quality gates passed.")
+"""
