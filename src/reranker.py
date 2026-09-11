@@ -4,15 +4,15 @@ from langsmith import traceable
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
 
-def filter_relevant_context(reranked_docs, MIN_RERANK_SCORE=0.35):
+def filter_relevant_context(reranked_docs, MIN_RERANK_SCORE=0.30):
     relevant_docs = []
 
-    for doc in reranked_docs[:5]:
-        relevant_docs.append(doc['doc'])
-
     # for doc in reranked_docs[:5]:
-    #     if doc['score'] > MIN_RERANK_SCORE:
-    #         relevant_docs.append(doc['doc'])
+    #     relevant_docs.append(doc['doc'])
+
+    for doc in reranked_docs[:5]:
+        if doc['score'] > MIN_RERANK_SCORE:
+            relevant_docs.append(doc['doc'])
 
     return relevant_docs
 

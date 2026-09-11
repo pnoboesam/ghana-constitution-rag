@@ -17,11 +17,10 @@ def generate_answer(question, context):
 
 
 def answer_question(question: str) -> str:
-    docs = retrieve(question)
-    reranked = rerank(question, docs)
-    context = format_docs(reranked)
+    retrieved_chunks = retrieve(question)
+    context = format_docs(retrieved_chunks)
     answer = {
         "answer": generate_answer(question, context),
-        "retrieved_chunks": reranked
+        "retrieved_chunks": retrieved_chunks
     }
     return answer
