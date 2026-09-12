@@ -57,7 +57,7 @@ with open(GROUND_TRUTH_DATASET_PATH, "r") as f:
     evaluation_dataset = json.load(f)
 
 # RUN RAG PIPELINE FOR EACH QUESTION----------------------
-run_inference(evaluation_dataset[27:32])
+run_inference(evaluation_dataset)
 
 # RUN RAG EVALUATION --------------------------------------
 llm = ChatOpenAI(
