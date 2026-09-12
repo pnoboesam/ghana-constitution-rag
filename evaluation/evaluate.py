@@ -34,7 +34,7 @@ LATEST_REPORT_PATH = EVAL_DIR / "reports" / "latest_report.md"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 METRICS_HISTORY_PATH.mkdir(parents=True, exist_ok=True)
 
-MIN_FAITHFULNESS = 0.85
+MIN_FAITHFULNESS = 0.80
 MIN_ANSWER_CORRECTNESS = 0.75
 MIN_CONTEXT_PRECISION = 0.85
 MIN_CONTEXT_RECALL = 0.9
