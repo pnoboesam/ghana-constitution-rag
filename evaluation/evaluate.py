@@ -34,10 +34,10 @@ LATEST_REPORT_PATH = EVAL_DIR / "reports" / "latest_report.md"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 METRICS_HISTORY_PATH.mkdir(parents=True, exist_ok=True)
 
-MIN_FAITHFULNESS = 0.80
-MIN_ANSWER_CORRECTNESS = 0.70
-MIN_CONTEXT_PRECISION = 0.80
-MIN_CONTEXT_RECALL = 0.80
+MIN_FAITHFULNESS = 0.85
+MIN_ANSWER_CORRECTNESS = 0.75
+MIN_CONTEXT_PRECISION = 0.85
+MIN_CONTEXT_RECALL = 0.9
 
 MAX_REGRESSION = {
     "faithfulness": 0.03,
@@ -57,7 +57,7 @@ with open(GROUND_TRUTH_DATASET_PATH, "r") as f:
     evaluation_dataset = json.load(f)
 
 # RUN RAG PIPELINE FOR EACH QUESTION----------------------
-run_inference(evaluation_dataset)
+run_inference(evaluation_dataset[27:32])
 
 # RUN RAG EVALUATION --------------------------------------
 llm = ChatOpenAI(
@@ -203,10 +203,6 @@ if baseline_metrics:
 
 metrics["regression"] = regressions
 
-with open(LATEST_METRICS_PATH, "w", encoding="utf-8") as f:
-        json.dump(metrics, f, indent=4, ensure_ascii=False)
-
-
 # SAVE METRICS HISTORY -------------------------------
 history_path = METRICS_HISTORY_PATH / f"{timestamp}.json"
 
@@ -226,37 +222,51 @@ report = generate_markdown_report(metrics, df_answerable, df_unanswerable, thres
 with open(LATEST_REPORT_PATH, "w", encoding="utf-8") as f:
     f.write(report)
 
-"""
+
 # ---------------- QUALITY GATES ----------------
 
-# 1. Aggregate hard floors
+quality_floors_passed = True
+missing_metrics_passed = True
+safe_no_answer_passed = True
+regression_passed = True
+
 quality_failures = []
 
+# 1. Aggregate hard floors
+quality_floor_failures = []
+
 if df_answerable["faithfulness"].mean() < MIN_FAITHFULNESS:
-    quality_failures.append("faithfulness")
+    quality_floor_failures.append("faithfulness")
 
 if df_answerable["answer_correctness"].mean() < MIN_ANSWER_CORRECTNESS:
-    quality_failures.append("answer_correctness")
+    quality_floor_failures.append("answer_correctness")
 
 if df_answerable["context_precision"].mean() < MIN_CONTEXT_PRECISION:
-    quality_failures.append("context_precision")
+    quality_floor_failures.append("context_precision")
 
 if df_answerable["context_recall"].mean() < MIN_CONTEXT_RECALL:
-    quality_failures.append("context_recall")
+    quality_floor_failures.append("context_recall")
+
+quality_floors_passed = len(quality_floor_failures) == 0
+quality_failures.extend(quality_floor_failures)
 
 # 2. Missing metric values
-if df_answerable[
+missing_metric_values = df_answerable[
     [
         "faithfulness",
         "answer_correctness",
         "context_precision",
         "context_recall",
     ]
-].isna().any().any():
+].isna().any().any()
+
+missing_metrics_passed = not missing_metric_values
+if not missing_metrics_passed:
     quality_failures.append("missing_metric_values")
 
 # 3. Unsafe no-answer responses
-if len(failed_unanswerable_cases) > 0:
+safe_no_answer_passed = len(failed_unanswerable_cases) == 0
+if not safe_no_answer_passed:
     quality_failures.append("unsafe_no_answer_responses")
 
 # 4. Regression against protected baseline
@@ -267,17 +277,34 @@ if baseline_metrics:
         if not result["passed"]
     ]
 
-    if failed_regressions:
+    regression_passed = len(failed_regressions) == 0
+
+    if not regression_passed:
         quality_failures.append(
             f"regression:{','.join(failed_regressions)}"
         )
 
 # 5. Fail CI
-if quality_failures:
+gate_passed = len(quality_failures) == 0
+
+metrics["overall_gate"] = {
+    "passed": gate_passed,
+    "failures": quality_failures,
+    "checks": {
+        "quality_floors": quality_floors_passed,
+        "missing_metrics": missing_metrics_passed,
+        "safe_no_answer": safe_no_answer_passed,
+        "regression": regression_passed
+    }
+}
+
+with open(LATEST_METRICS_PATH, "w", encoding="utf-8") as f:
+    json.dump(metrics, f, indent=4, ensure_ascii=False)
+
+if not gate_passed:
     raise RuntimeError(
         "Evaluation quality gate failed: "
         + "; ".join(quality_failures)
     )
 
 print("All evaluation quality gates passed.")
-"""

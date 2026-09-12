@@ -2,8 +2,11 @@ name: Evaluate RAG
 
 on:
   pull_request:
-  push:
     branches: [main]
+
+  permissions:
+    contents: read
+    pull-requests: write
 
 jobs:
   evaluate:
@@ -27,7 +30,176 @@ jobs:
           python -c "from langchain_openai import ChatOpenAI; import os; llm=ChatOpenAI(model='openai/gpt-4.1-mini', base_url='https://openrouter.ai/api/v1', api_key=os.environ['OPENROUTER_API_KEY'], timeout=30); print(llm.invoke('Reply with OK'))"
 
       - name: Run evaluation
+        id: evaluation
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
         run: python -m evaluation.evaluate
+
+      - name: Post evaluation results to PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+
+            const reportPath = "evaluation/reports/latest_metrics.json";
+
+            const marker = "<!-- rag-evaluation-report -->";
+
+            let body;
+
+            if (!fs.existsSync(reportPath)) {
+              body = `${marker}
+
+            ## 🤖 Ghana Constitution RAG — Evaluation Report
+
+            ❌ **Evaluation failed before a metrics report was generated.**
+
+            See the GitHub Actions logs for details.
+
+            ---
+            *Generated automatically by GitHub Actions.*
+            `;
+            } else {
+              const report = JSON.parse(
+                fs.readFileSync(reportPath, "utf8")
+              );
+
+              const metrics =
+                report.answerable_evaluation.metrics;
+
+              const noAnswer =
+                report.unanswerable_evaluation.metrics;
+
+              const outcomes =
+                report.unanswerable_evaluation.outcomes;
+
+              const regression =
+                report.regression;
+
+              const checks =
+                report.overall_gate.checks;
+
+              const overallPassed =
+                report.overall_gate.passed;
+
+              const gateStatus =
+                passed => passed ? "✅ PASS" : "❌ FAIL";
+
+              const changeStatus =
+                value => value >= 0
+                  ? `🟢 +${value.toFixed(4)}`
+                  : `🔴 ${value.toFixed(4)}`;
+
+              body = `${marker}
+
+            ## 🤖 Ghana Constitution RAG — Evaluation Report
+
+            **Evaluation run:** \`${report.evaluation_run}\`
+
+            ### 📊 Answerable Questions
+
+            **${report.dataset.answerable_questions} answerable questions**
+
+            | Metric | Current | Baseline | Change | Regression Gate |
+            |---|---:|---:|---:|---|
+            | Faithfulness | **${metrics.faithfulness.toFixed(4)}** | ${regression.faithfulness.baseline.toFixed(4)} | ${changeStatus(regression.faithfulness.change)} | ${gateStatus(regression.faithfulness.passed)} |
+            | Answer Correctness | **${metrics.answer_correctness.toFixed(4)}** | ${regression.answer_correctness.baseline.toFixed(4)} | ${changeStatus(regression.answer_correctness.change)} | ${gateStatus(regression.answer_correctness.passed)} |
+            | Context Precision | **${metrics.context_precision.toFixed(4)}** | ${regression.context_precision.baseline.toFixed(4)} | ${changeStatus(regression.context_precision.change)} | ${gateStatus(regression.context_precision.passed)} |
+            | Context Recall | **${metrics.context_recall.toFixed(4)}** | ${regression.context_recall.baseline.toFixed(4)} | ${changeStatus(regression.context_recall.change)} | ${gateStatus(regression.context_recall.passed)} |
+
+            **Framework:** Ragas
+
+            ### 🛡️ Unanswerable Questions
+
+            **${report.dataset.unanswerable_questions} unanswerable questions**
+
+            | Metric | Result |
+            |---|---:|
+            | Safe No-Answer Rate | **${(noAnswer.safe_no_answer_rate * 100).toFixed(2)}%** |
+            | Unsafe Answer Rate | **${(noAnswer.unsafe_answer_rate * 100).toFixed(2)}%** |
+
+            **Outcomes**
+
+            - ✅ Clear abstention: ${outcomes.clear_abstention}
+            - ✅ Abstained with grounded context: ${outcomes.abstained_with_grounded_context}
+            - ❌ Unsafe answer: ${outcomes.unsafe_answer}
+
+            **Framework:** Custom
+
+            ### 🔄 Regression Analysis
+
+            | Metric | Baseline | Current | Allowed Regression | Status |
+            |---|---:|---:|---:|---|
+            | Faithfulness | ${regression.faithfulness.baseline.toFixed(4)} | ${regression.faithfulness.current.toFixed(4)} | ${regression.faithfulness.allowed_regression.toFixed(4)} | ${gateStatus(regression.faithfulness.passed)} |
+            | Answer Correctness | ${regression.answer_correctness.baseline.toFixed(4)} | ${regression.answer_correctness.current.toFixed(4)} | ${regression.answer_correctness.allowed_regression.toFixed(4)} | ${gateStatus(regression.answer_correctness.passed)} |
+            | Context Precision | ${regression.context_precision.baseline.toFixed(4)} | ${regression.context_precision.current.toFixed(4)} | ${regression.context_precision.allowed_regression.toFixed(4)} | ${gateStatus(regression.context_precision.passed)} |
+            | Context Recall | ${regression.context_recall.baseline.toFixed(4)} | ${regression.context_recall.current.toFixed(4)} | ${regression.context_recall.allowed_regression.toFixed(4)} | ${gateStatus(regression.context_recall.passed)} |
+
+            ### 🚦 Quality Gates
+
+            | Check | Status |
+            |---|---|
+            | Quality Floors | ${gateStatus(checks.quality_floors)} |
+            | Missing Metrics | ${gateStatus(checks.missing_metrics)} |
+            | Safe No-Answer | ${gateStatus(checks.safe_no_answer)} |
+            | Regression | ${gateStatus(checks.regression)} |
+
+            ### Overall Gate
+
+            ${overallPassed
+              ? "## ✅ PASSED"
+              : "## ❌ FAILED"}
+
+            ${report.overall_gate.failures.length > 0
+              ? `**Failures:** ${report.overall_gate.failures.join(", ")}`
+              : "All evaluation quality gates passed."}
+
+            ---
+
+            **Dataset:** ${report.dataset.total_questions} questions
+            (${report.dataset.answerable_questions} answerable,
+            ${report.dataset.unanswerable_questions} unanswerable)
+
+            *Generated automatically by GitHub Actions.*
+            `;
+            }
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                per_page: 100
+              }
+            );
+
+            const existingComment = comments.find(
+              comment =>
+                comment.user.type === "Bot" &&
+                comment.body.includes(marker)
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body
+              });
+
+              console.log(
+                `Updated evaluation comment ${existingComment.id}`
+              );
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+
+              console.log("Created evaluation comment");
+            }
